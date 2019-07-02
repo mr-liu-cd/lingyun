@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lingyun.dao.YrTableRowDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lingyun.domain.entity.YrTableRowEntity" id="yrTableRowMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="tableId" column="table_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="isDeleted" column="is_deleted"/>
+    </resultMap>
+    <select id="getHeardList" resultType="java.lang.String">
+        SELECT name from yr_table_row
+        WHERE table_id=#{tableId}
+        and is_deleted=0
+    </select>
+
+
+</mapper>

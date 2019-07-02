@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lingyun.dao.YrTableValDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lingyun.domain.entity.YrTableValEntity" id="yrTableValMap">
+        <result property="id" column="id"/>
+        <result property="rowId" column="row_id"/>
+        <result property="line" column="line"/>
+        <result property="val" column="val"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="isDeleted" column="is_deleted"/>
+    </resultMap>
+    <resultMap type="com.lingyun.domain.dto.YrTableValDTO" id="yrTableValDTO">
+        <result property="id" column="id"/>
+        <result property="rowId" column="row_id"/>
+        <result property="line" column="line"/>
+        <result property="val" column="val"/>
+        <result property="rowName" column="name"/>
+    </resultMap>
+    <resultMap id="yrTableRowDTO" type="com.lingyun.domain.dto.YrTableRowDTO">
+        <result property="line" column="line"/>
+        <result property="val" column="val"/>
+    </resultMap>
+    <insert id="batchInsert">
+        INSERT into yr_table_val(row_id,line,val) VALUES
+        <foreach collection="list" item="entity" separator=",">
+            (#{entity.rowId},#{entity.line},#{entity.val})
+        </foreach>
+    </insert>
+    <delete id="deleteRow">
+        DELETE yr_table_val from yr_table_val,yr_table_row
+        WHERE yr_table_val.row_id=yr_table_row.id
+        and yr_table_row.table_id=#{tableId}
+        and yr_table_val.line=#{line}
+
+    </delete>
+    <delete id="deleteTable">
+        DELETE yr_table,yr_table_row,yr_table_val from yr_table,yr_table_row,yr_table_val
+            where yr_table_row.table_id=yr_table.id
+            and yr_table_val.row_id=yr_table_row.id
+            and yr_table.id=#{tableId}
+    </delete>
+    <select id="getCurrentLine" resultType="java.lang.Integer">
+        SELECT MAX(v.line) from yr_table_val v
+        LEFT JOIN yr_table_row r on r.id=v.row_id
+        WHERE r.table_id=#{tableId}
+    </select>
+    <select id="getValListByLine" resultMap="yrTableValDTO" parameterType="java.util.Map">
+        SELECT yr_table_val.*,yr_table_row.name from yr_table_val,yr_table_row
+        WHERE yr_table_val.row_id=yr_table_row.id
+        and yr_table_row.table_id=#{tableId}
+        and yr_table_val.line=#{line}
+    </select>
+    <select id="getTableList" resultMap="yrTableRowDTO">
+        SELECT CONCAT(GROUP_CONCAT(CONCAT(r.`name`,":",v.val))) as val,line from yr_table_val v
+        LEFT JOIN yr_table_row r on v.row_id=r.id
+        WHERE r.table_id=#{tableId}
+        <if test="line!=null">
+            and v.line=#{line}
+        </if>
+        <if test="key!=null">
+            and v.val like #{key}
+        </if>
+        GROUP BY v.line
+        limit #{startNum},#{perPage}
+    </select>
+    <select id="countTableList" resultType="java.lang.Integer">
+        select count(*) from (
+            SELECT GROUP_CONCAT(CONCAT(r.`name`,":",v.val)) from yr_table_val v
+            LEFT JOIN yr_table_row r on v.row_id=r.id
+            WHERE r.table_id=#{tableId}
+            <if test="line!=null">
+                and v.line=#{line}
+            </if>
+            <if test="key!=null">
+                and v.val like #{key}
+            </if>
+            GROUP BY v.line
+        )a
+    </select>
+
+
+</mapper>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lingyun.dao.LyCustomerDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lingyun.domain.from.LyCustomerFrom" id="lyCustomerFrom">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="imgUrl" column="img_url"/>
+        <result property="tele" column="tele"/>
+        <result property="idCard" column="id_card"/>
+        <result property="repairTimes" column="repair_times"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+    <select id="getCustomerList" resultMap="lyCustomerFrom">
+        SELECT * from ly_customer
+        <if test="key!=null">
+            where name like #{key}
+        </if>
+        LIMIT #{startNum},#{perPage}
+    </select>
+    <select id="countCustomerList" resultType="java.lang.Integer">
+          SELECT count(*) from ly_customer
+        <if test="key!=null">
+            where name like #{key}
+        </if>
+    </select>
+
+
+</mapper>

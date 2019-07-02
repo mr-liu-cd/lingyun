@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lingyun.dao.LyOrderDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lingyun.domain.from.LyOrderFrom" id="lyOrderFrom">
+        <result property="id" column="id"/>
+        <result property="orderNum" column="order_num"/>
+        <result property="carId" column="car_id"/>
+        <result property="payTotal" column="pay_total"/>
+        <result property="state" column="state"/>
+        <result property="createTime" column="create_time"/>
+        <result property="license" column="license"/>
+        <result property="name" column="name"/>
+        <result property="typeName" column="typeName"/>
+        <result property="brandName" column="brandName"/>
+        <result property="tele" column="tele"/>
+    </resultMap>
+    <select id="getOrderByCar" resultMap="lyOrderFrom">
+            SELECT * from ly_order
+            WHERE car_id=#{id}
+    </select>
+    <select id="getOrderByCustomer" resultMap="lyOrderFrom">
+          SELECT * from ly_order
+            WHERE customer_id=#{id}
+    </select>
+    <select id="getOrderList" resultMap="lyOrderFrom">
+        SELECT
+            o.*, car.license,
+            c.`name`,
+            c.tele,
+            t.`name` AS typeName,
+            d.`name` AS brandName
+        FROM
+            ly_order o
+        LEFT JOIN ly_customer c ON o.customer_id = c.id
+        LEFT JOIN ly_car car ON car.id = o.car_id
+        LEFT JOIN ly_car_type t ON t.id = car.car_type
+        LEFT JOIN ly_unit_detail d ON d.id = t.brand_id
+        WHERE
+            o.state = 1
+        <if test="key!=null">
+        AND (
+            c.`name` LIKE '%test%'
+            OR car.license LIKE '%1234567%'
+        )
+        </if>
+        <if test="start!=null">
+            AND o.create_time &gt; #{start}
+        </if>
+        <if test="end!=null">
+            AND o.create_time &lt; #{end}
+        </if>
+        limit #{startNum},#{perPage}
+    </select>
+    <select id="countOrderList" resultType="java.lang.Integer">
+        SELECT
+        count(*)
+        FROM
+        ly_order o
+        LEFT JOIN ly_customer c ON o.customer_id = c.id
+        LEFT JOIN ly_car car ON car.id = o.car_id
+        LEFT JOIN ly_car_type t ON t.id = car.car_type
+        LEFT JOIN ly_unit_detail d ON d.id = t.brand_id
+        WHERE
+        o.state = 1
+        <if test="key!=null">
+            AND (
+            c.`name` LIKE '%test%'
+            OR car.license LIKE '%1234567%'
+            )
+        </if>
+        <if test="start!=null">
+            AND o.create_time &gt; #{start}
+        </if>
+        <if test="end!=null">
+            AND o.create_time &lt; #{end}
+        </if>
+    </select>
+
+
+</mapper>

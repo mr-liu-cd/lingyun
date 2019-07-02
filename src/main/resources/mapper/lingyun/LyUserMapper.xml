@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lingyun.dao.LyUserDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lingyun.domain.entity.LyUserEntity" id="lyUserMap">
+        <result property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="createTime" column="create_time"/>
+        <result property="roleId" column="role_id"/>
+        <result property="isDelete" column="is_delete"/>
+    </resultMap>
+    <select id="getAdminUser" resultType="com.lingyun.domain.from.LyUserFrom">
+        SELECT
+            u.id,
+            u.username,
+            u.role_id as roleId,
+            u.is_delete as status,
+            r.`name` AS roleName
+        FROM
+            ly_user u
+        LEFT JOIN ly_role r ON r.id = u.role_id
+        where u.is_delete=0
+        LIMIT #{startNum},#{perPage}
+</select>
+    <select id="countAdminUser" resultType="java.lang.Integer">
+        SELECT
+           count(*)
+        FROM
+            ly_user u
+        LEFT JOIN ly_role r ON r.id = u.role_id
+        where u.is_delete=0
+    </select>
+
+
+</mapper>

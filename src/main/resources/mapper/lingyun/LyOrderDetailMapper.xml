@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lingyun.dao.LyOrderDetailDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lingyun.domain.from.LyOrderDetailFrom" id="lyOrderDetailFrom">
+        <result property="id" column="id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="detailId" column="detail_id"/>
+        <result property="price" column="price"/>
+        <result property="num" column="num"/>
+        <result property="name" column="name"/>
+        <result property="unitId" column="unitId"/>
+    </resultMap>
+
+    <select id="getOrderDetailByOrder" resultMap="lyOrderDetailFrom">
+         SELECT d.*,u.`name`,t.id as unitId from ly_order_detail d
+                LEFT JOIN ly_unit_detail u on u.id=d.detail_id
+				LEFT JOIN ly_units t on t.id=u.unit_id
+        WHERE d.order_id=#{orderId}
+        limit #{startNum},#{perPage}
+    </select>
+    <select id="countOrderDetailByOrder" resultType="java.lang.Integer">
+         SELECT count(*) from ly_order_detail d
+        LEFT JOIN ly_unit_detail u on u.id=d.detail_id
+        LEFT JOIN ly_units t on t.id=u.unit_id
+        WHERE d.order_id=#{orderId}
+    </select>
+
+
+</mapper>

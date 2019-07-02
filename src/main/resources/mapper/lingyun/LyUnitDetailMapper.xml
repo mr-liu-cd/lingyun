@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lingyun.dao.LyUnitDetailDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lingyun.domain.entity.LyUnitDetailEntity" id="lyUnitDetailMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="unitId" column="unit_id"/>
+    </resultMap>
+    <resultMap id="lyUnitsDetailFrom" type="com.lingyun.domain.from.LyUnitsDetailFrom">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="unitId" property="unitId"/>
+        <result column="desc" property="desc"/>
+    </resultMap>
+    <select id="getBrandList" resultMap="lyUnitDetailMap">
+        SELECT d.* from ly_unit_detail d
+        LEFT JOIN ly_units u on u.id=d.unit_id
+        where u.name=#{name}
+        limit #{startNum},#{perPage}
+    </select>
+    <select id="countBrandList" resultType="java.lang.Integer">
+          SELECT count(*) from ly_unit_detail d
+        LEFT JOIN ly_units u on u.id=d.unit_id
+        where u.name=#{name}
+    </select>
+    <select id="getPageDetailByUnit" resultMap="lyUnitsDetailFrom">
+        SELECT d.id,d.name,u.id as unitId,u.desc from ly_unit_detail d
+        LEFT JOIN ly_units u on u.id=d.unit_id
+       <if test="unitId!=null">
+           WHERE u.id=#{unitId}
+       </if>
+        limit #{startNum},#{perPage}
+    </select>
+    <select id="countPageDetailByUnit" resultType="java.lang.Integer">
+        SELECT count(*) from ly_unit_detail d
+        LEFT JOIN ly_units u on u.id=d.unit_id
+        <if test="unitId!=null">
+            WHERE u.id=#{unitId}
+        </if>
+    </select>
+    <select id="getUnitsList" resultType="com.lingyun.domain.entity.LyUnitsEntity">
+        SELECT * from ly_units
+        limit #{startNum},#{perPage}
+    </select>
+    <select id="countUnitsList" resultType="java.lang.Integer">
+         SELECT count(*) from ly_units
+    </select>
+
+
+</mapper>

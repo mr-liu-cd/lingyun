@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lingyun.dao.LyCarDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lingyun.domain.from.LyCarFrom" id="lyCarFrom">
+        <result property="id" column="id"/>
+        <result property="carType" column="car_type"/>
+        <result property="license" column="license"/>
+        <result property="customerId" column="customer_id"/>
+        <result property="recentRepairTime" column="recent_repair_time"/>
+        <result property="insuranceTime" column="insurance_time"/>
+        <result property="annualInspectionTime" column="annual_inspection_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="typeName" column="typeName"/>
+        <result property="brandName" column="brandName"/>
+        <result property="customer" column="customer"/>
+        <result property="times" column="times"/>
+        <result property="tele" column="tele"/>
+    </resultMap>
+
+    <resultMap id="lyOrderDto" type="com.lingyun.domain.dto.LyOrderDto">
+        <id column="id" property="carId"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="name" property="name"/>
+        <result column="tele" property="tele"/>
+        <result column="id_card" property="idCard"/>
+        <result column="car_type" property="carType"/>
+        <result column="license" property="license"/>
+        <result column="insurance_time" property="insuranceTime"/>
+        <result column="annual_inspection_time" property="annualInspectionTime"/>
+        <result column="brandName" property="brandName"/>
+        <result column="typeName" property="typeName"/>
+    </resultMap>
+
+    <select id="getCarList" resultMap="lyCarFrom">
+              SELECT
+                    c.*,
+                  t.`name` AS typeName,
+                    d.`name` AS brandName,
+                    cus.`name` as customer,
+                    count(o.id) as times
+                FROM
+                    ly_car c
+                LEFT JOIN ly_car_type t ON t.id = c.car_type
+                LEFT JOIN ly_unit_detail d ON d.id = t.brand_id
+                LEFT JOIN ly_customer cus on cus.id=c.customer_id
+                LEFT JOIN ly_order o on o.car_id=c.id
+                WHERE 1=1
+                <if test="brandId!=null">
+                    and d.id=#{brandId}
+                </if>
+                <if test="key!=null">
+                    and c.license like #{key}
+                </if>
+                GROUP BY c.id
+            limit #{startNum},#{perPage}
+    </select>
+    <select id="countCarList" resultType="java.lang.Integer">
+             select count(*) from (
+        SELECT
+        count(*)
+        FROM
+        ly_car c
+        LEFT JOIN ly_car_type t ON t.id = c.car_type
+        LEFT JOIN ly_unit_detail d ON d.id = t.brand_id
+        LEFT JOIN ly_customer cus on cus.id=c.customer_id
+        LEFT JOIN ly_order o on o.car_id=c.id
+        WHERE 1=1
+        <if test="brandId!=null">
+            and d.id=#{brandId}
+        </if>
+        <if test="key!=null">
+            and c.license like #{key}
+        </if>
+        GROUP BY c.id
+             )a
+    </select>
+    <select id="getInfoByLicense" resultMap="lyOrderDto">
+        SELECT
+                c.*, cus.`name`,
+                cus.tele,
+                cus.id_card,
+                t.name as typeName,
+                d.name as brandName
+            FROM
+                ly_car c
+            LEFT JOIN ly_customer cus ON cus.id = c.customer_id
+            LEFT JOIN ly_car_type t on t.id=c.car_type
+            LEFT JOIN ly_unit_detail d on d.id=t.brand_id
+            WHERE c.license like #{key}
+    </select>
+    <select id="getInfoByName" resultMap="lyOrderDto">
+        SELECT
+                cus.id AS customer_id,
+                cus.`name`,
+                cus.id_card,
+                cus.tele,
+                t.name as typeName,
+                d.name as brandName,
+                c.*
+            FROM
+                ly_customer cus
+            LEFT JOIN ly_car c ON c.customer_id = cus.id
+            LEFT JOIN ly_car_type t on t.id=c.car_type
+            LEFT JOIN ly_unit_detail d on d.id=t.brand_id
+            WHERE cus.`name` like #{key}
+
+    </select>
+    <select id="getInsuranceCar" resultMap="lyCarFrom">
+        SELECT c.*,p.`name` as typeName,t.`name` as customer,t.tele,u.`name` as brandName FROM ly_car c
+        LEFT JOIN ly_customer t on c.customer_id=t.id
+        LEFT JOIN ly_car_type p on p.id=c.car_type
+        LEFT JOIN ly_unit_detail u on u.id=p.brand_id
+        WHERE c.insurance_time - INTERVAL 1 MONTH &lt; NOW()
+        ORDER BY c.insurance_time
+        limit #{startNum},#{perPage}
+    </select>
+    <select id="countInsuranceCar" resultType="java.lang.Integer">
+        SELECT count(*) FROM ly_car c
+        LEFT JOIN ly_customer t on c.customer_id=t.id
+        LEFT JOIN ly_car_type p on p.id=c.car_type
+        LEFT JOIN ly_unit_detail u on u.id=p.brand_id
+        WHERE c.insurance_time - INTERVAL 1 MONTH &lt; NOW()
+        ORDER BY c.insurance_time
+    </select>
+    <select id="getAnnualInspectionCar" resultMap="lyCarFrom">
+        SELECT c.*,p.`name` as typeName,t.`name` as customer,t.tele,u.`name` as brandName FROM ly_car c
+        LEFT JOIN ly_customer t on c.customer_id=t.id
+        LEFT JOIN ly_car_type p on p.id=c.car_type
+        LEFT JOIN ly_unit_detail u on u.id=p.brand_id
+        WHERE c.annual_inspection_time  - INTERVAL 1 MONTH &lt; NOW()
+        ORDER BY c.annual_inspection_time
+        limit #{startNum},#{perPage}
+    </select>
+    <select id="countAnnualInspectionCar" resultType="java.lang.Integer">
+         SELECT count(*) FROM ly_car c
+        LEFT JOIN ly_customer t on c.customer_id=t.id
+        LEFT JOIN ly_car_type p on p.id=c.car_type
+        LEFT JOIN ly_unit_detail u on u.id=p.brand_id
+        WHERE c.annual_inspection_time  - INTERVAL 1 MONTH &lt; NOW()
+        ORDER BY c.annual_inspection_time
+    </select>
+
+
+</mapper>

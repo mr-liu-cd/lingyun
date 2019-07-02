@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lingyun.dao.LyRoleDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.lingyun.domain.from.LyRoleFrom" id="lyRoleFrom">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+    </resultMap>
+    <select id="getRoleList" resultMap="lyRoleFrom">
+        SELECT * from ly_role
+        limit #{startNum},#{perPage}
+    </select>
+    <select id="countRoleList" resultType="java.lang.Integer">
+         SELECT count(*) from ly_role
+    </select>
+
+    <insert id="setMenu4Role" parameterType="java.util.Map">
+        insert into ly_role_menu (role_id, menu_id)
+        values (#{roleId}, #{menuId})
+    </insert>
+    <delete id="clearMenu4Role" parameterType="java.lang.Integer">
+        DELETE FROM ly_role_menu WHERE role_id = #{roleId}
+    </delete>
+
+
+</mapper>
